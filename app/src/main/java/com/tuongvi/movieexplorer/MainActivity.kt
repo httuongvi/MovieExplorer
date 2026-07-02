@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -58,12 +59,16 @@ class MainActivity : ComponentActivity() {
 
 
 @Composable
-fun MovieCard(movie: Movie){
+fun MovieCard(
+    movie: Movie,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+    ){
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
-            .padding(16.dp),
+            .clickable{onClick()}
+            .padding(24.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Column(modifier = Modifier.weight(1f)) {
@@ -104,58 +109,95 @@ fun MovieCard(movie: Movie){
 /// drill day 03
 @Composable
 fun Day03DrillScreen() {
+    var counter by remember { mutableStateOf(0) }
+    var isColorOn by remember { mutableStateOf(false) }
+    var nameInput by remember { mutableStateOf("") }
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(30.dp),
+            .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        var counter by remember { mutableStateOf(0) }
+        Counter(
+            count = counter,
+            onIncrement = { counter++ },
+            onDecrement = { if (counter > 0) counter-- },
+            onReset = { counter = 0 }
+        )
 
-        Column {
-            Text("1. Counter: $counter", style = MaterialTheme.typography.titleMedium)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Button(onClick = { counter++ }) { Text("+") }
-                Button(onClick = { if (counter > 0) counter-- }) { Text("–") }
-                Button(onClick = { counter = 0 }) { Text("Reset") }
-            }
+        Toggle(
+            isOn = isColorOn,
+            onToggle = { isColorOn = !isColorOn }
+        )
+
+        Greeting(
+            name = nameInput,
+            onNameChange = { nameInput = it }
+        )
+    }
+}
+
+@Composable
+fun Counter(
+    count: Int,
+    onIncrement: () -> Unit,
+    onDecrement: () -> Unit,
+    onReset: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier) {
+        Text("1. Counter: $count", style = MaterialTheme.typography.titleMedium)
+        Spacer(modifier = Modifier.height(8.dp))
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(onClick = onIncrement) { Text("+") }
+            Button(onClick = onDecrement) { Text("-") }
+            Button(onClick = onReset) { Text("Reset") }
         }
+    }
+}
 
-
-        var isColorOn by remember { mutableStateOf(false) }
-
-        Column {
-            Text("2. Toggle Button", style = MaterialTheme.typography.titleMedium)
-            Spacer(modifier = Modifier.height(4.dp))
-            Button(
-                onClick = { isColorOn = !isColorOn },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (isColorOn) Color.Green else Color.Red
-                )
-            ) {
-                Text(if (isColorOn) "ON" else "OFF", color = Color.White)
-            }
-        }
-
-        var nameInput by remember { mutableStateOf("") }
-
-        Column {
-            Text("3. Greeting Realtime", style = MaterialTheme.typography.titleMedium)
-            Spacer(modifier = Modifier.height(4.dp))
-            TextField(
-                value = nameInput,
-                onValueChange = { nameInput = it },
-                label = { Text("Nhập tên") },
-                modifier = Modifier.fillMaxWidth()
+@Composable
+fun Toggle(
+    isOn: Boolean,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier) {
+        Text("2. Toggle Button", style = MaterialTheme.typography.titleMedium)
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(
+            onClick = onToggle,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (isOn) Color(0xFF4CAF50) else Color(0xFFF44336)
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = if (nameInput.isEmpty()) "Vui lòng nhập tên..." else "Xin chào, $nameInput!",
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF6200EE)
-            )
+        ) {
+            Text(if (isOn) "ON" else "OFF", color = Color.White)
         }
+    }
+}
+
+@Composable
+fun Greeting(
+    name: String,
+    onNameChange: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier) {
+        Text("3. Greeting Realtime", style = MaterialTheme.typography.titleMedium)
+        Spacer(modifier = Modifier.height(8.dp))
+        TextField(
+            value = name,
+            onValueChange = onNameChange,
+            label = { Text("Nhập tên") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = if (name.isEmpty()) "Vui lòng nhập tên..." else "Xin chào, $name!",
+            style = MaterialTheme.typography.bodyLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
+        )
     }
 }
 
@@ -171,7 +213,7 @@ fun MovieCardPreview() {
         voteAverage = 8.6,
         releaseDate = "1/1/2026"
     )
-    MovieCard(movie = sampleMovie)
+    MovieCard(movie = sampleMovie, onClick = {})
 }
 
 
