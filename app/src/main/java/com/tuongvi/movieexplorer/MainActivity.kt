@@ -27,11 +27,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Movie
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -41,6 +44,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,6 +57,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import com.tuongvi.movieexplorer.model.Movie
 import com.tuongvi.movieexplorer.ui.theme.MovieExplorerTheme
@@ -74,8 +80,9 @@ class MainActivity : ComponentActivity() {
             MovieExplorerTheme {
                 //MovieListScreen()
                 //ListFoodScreen()
-                //AppNavigation()
-                Navigation()
+                AppNavigation()
+                //Navigation()
+                //Day06DrillScreen()
             }
         }
 
@@ -244,9 +251,11 @@ val sampleMovies = listOf(
 )
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun MovieListScreen(onMovieClick: (Int) -> Unit){
-
-
+fun MovieListScreen(
+    onMovieClick: (Int) -> Unit,
+    viewModel: MovieListViewModel = viewModel()
+){
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -265,10 +274,10 @@ fun MovieListScreen(onMovieClick: (Int) -> Unit){
                     }
                 },
                 actions = {
-                    IconButton(onClick = {}) {
+                    IconButton(onClick = { viewModel.refresh() }) {
                         Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Tìm kiếm"
+                            imageVector = Icons.Default.Refresh,
+                            contentDescription = "Làm mới danh sách"
                         )
                     }
                 },
@@ -281,23 +290,52 @@ fun MovieListScreen(onMovieClick: (Int) -> Unit){
             )
         }
     ) { innerPadding ->
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(
-                top = innerPadding.calculateTopPadding() + 8.dp,
-                bottom = innerPadding.calculateBottomPadding() + 8.dp,
-                start = 16.dp,
-                end = 16.dp
-            ),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            items(
-                items = sampleMovies,
-                key = { movie -> movie.id }
-            ) { movie ->
-                MovieCard(movie, onClick = {onMovieClick(movie.id)})
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
+            contentAlignment = Alignment.Center
+
+        ){
+            when (val state = uiState){
+                is MovieListUiState.Loading -> {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                is MovieListUiState.Success -> {
+                    LazyColumn(
+                        contentPadding = PaddingValues(
+                            top = 0.dp,
+                            bottom = 16.dp,
+                            start = 16.dp,
+                            end = 16.dp
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(
+                            items = state.movies,
+                            key = { movie -> movie.id }
+                        ) { movie ->
+                            MovieCard(movie, onClick = {onMovieClick(movie.id)})
+                        }
+                    }
+                }
+                is MovieListUiState.Error ->{
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(text = state.message, color = MaterialTheme.colorScheme.error)
+                        Button(onClick = { viewModel.loadMovies() }) {
+                            Text("Thử lại")
+                        }
+                    }
+                }
             }
         }
+
 
     }
 
