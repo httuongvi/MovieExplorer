@@ -1,4 +1,4 @@
-package com.tuongvi.movieexplorer
+package com.tuongvi.movieexplorer.ui.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box

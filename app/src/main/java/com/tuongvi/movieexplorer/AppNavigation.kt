@@ -1,15 +1,22 @@
 package com.tuongvi.movieexplorer
 
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.tuongvi.movieexplorer.ui.screens.MovieDetailScreen
+import com.tuongvi.movieexplorer.ui.screens.MovieListScreen
+import com.tuongvi.movieexplorer.viewmodel.MovieListViewModel
 
 @Composable
 fun AppNavigation(){
     val navController = rememberNavController()
+
+    val movieViewModel: MovieListViewModel = viewModel()
 
     NavHost(
         navController = navController,
@@ -17,6 +24,7 @@ fun AppNavigation(){
     ){
         composable("list") {
             MovieListScreen(
+                viewModel = movieViewModel,
                 onMovieClick = { movieId ->
                     navController.navigate("detail/${movieId}")
                 }
@@ -30,8 +38,9 @@ fun AppNavigation(){
                 )
             ){ backStackEntry ->
             val movieId = backStackEntry.arguments?.getInt("movieId") ?: 0
+            val selectedMovie = movieViewModel.getMovieById(movieId)
             MovieDetailScreen(
-                movieId,
+                movie = selectedMovie,
                 onBackClick = {
                     navController.popBackStack()
                 }
