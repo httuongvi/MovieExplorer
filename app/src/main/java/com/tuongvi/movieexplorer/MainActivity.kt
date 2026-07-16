@@ -1,6 +1,8 @@
 package com.tuongvi.movieexplorer
 
+import android.content.ContentValues.TAG
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -49,7 +51,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil3.compose.AsyncImage
 import com.tuongvi.movieexplorer.model.Movie
+import com.tuongvi.movieexplorer.ui.screens.Day03DrillScreen
 import com.tuongvi.movieexplorer.ui.screens.Day06DrillScreen
+import com.tuongvi.movieexplorer.ui.screens.Day08DrillScreen
 import com.tuongvi.movieexplorer.ui.theme.MovieExplorerTheme
 import com.tuongvi.movieexplorer.viewmodel.MovieListViewModel
 
@@ -66,17 +70,45 @@ class MainActivity : ComponentActivity() {
         safeLength(null)
 
         fizzbuzz()
+        Log.d("MainActivityLifecycle", "onCreate() được gọi")
         setContent {
             MovieExplorerTheme {
                 //MovieListScreen()
                 //ListFoodScreen()
-                AppNavigation()
+                //AppNavigation()
                 //Navigation()
                 //Day06DrillScreen()
+                Day08DrillScreen()
             }
         }
 
     }
+
+    override fun onStart() {
+        super.onStart()
+        Log.d("MainActivityLifecycle", "onStart() được gọi")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d("MainActivityLifecycle", "onResume() được gọi")
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.d("MainActivityLifecycle", "onPause() được gọi")
+    }
+
+    override fun onStop() {
+        super.onStop()
+        Log.d("MainActivityLifecycle", "onStop() được gọi")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.d("MainActivityLifecycle", "onDestroy() được gọi")
+    }
+
 }
 
 
