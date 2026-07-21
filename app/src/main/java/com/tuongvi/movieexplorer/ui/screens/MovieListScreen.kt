@@ -56,7 +56,7 @@ fun MovieListScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = {viewModel.simulateLoading()}) {
+                    IconButton(onClick = {viewModel.refresh()}) {
                         Icon(
                             imageVector = Icons.Default.Menu,
                             contentDescription = "Giả lập loading"
@@ -87,8 +87,8 @@ fun MovieListScreen(
         ) {
             OutlinedTextField(
                 value = searchQuery,
-                onValueChange = {newText ->
-                    viewModel.onSearchQueryChanged(newText)
+                onValueChange = {query ->
+                    viewModel.searchMovies(query)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -99,7 +99,7 @@ fun MovieListScreen(
                 },
                 trailingIcon = {
                     if (searchQuery.isNotEmpty()) {
-                        IconButton(onClick = { viewModel.onSearchQueryChanged("") }) {
+                        IconButton(onClick = { viewModel.searchMovies("") }) {
                             Icon(imageVector = Icons.Default.Clear, contentDescription = "Xóa từ khóa")
                         }
                     }

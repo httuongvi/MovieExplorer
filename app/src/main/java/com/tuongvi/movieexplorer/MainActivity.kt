@@ -62,23 +62,10 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-
-        grade(7)
-        grade(15)
-
-        safeLength("Hello")
-        safeLength(null)
-
-        fizzbuzz()
-        Log.d("MainActivityLifecycle", "onCreate() được gọi")
         setContent {
             MovieExplorerTheme {
-                //MovieListScreen()
-                //ListFoodScreen()
-                //AppNavigation()
-                //Navigation()
-                //Day06DrillScreen()
-                Day08DrillScreen()
+                AppNavigation()
+
             }
         }
 
