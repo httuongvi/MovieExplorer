@@ -36,16 +36,21 @@ import com.tuongvi.movieexplorer.model.MovieListUiState
 import com.tuongvi.movieexplorer.ui.components.MovieCard
 import com.tuongvi.movieexplorer.viewmodel.MovieListViewModel
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.runtime.State
+import androidx.hilt.navigation.compose.hiltViewModel
 
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun MovieListScreen(
+    uiState: MovieListUiState,
+    searchQuery: String,
+    onRefresh: () -> Unit,
+    onRetry : () -> Unit,
     onMovieClick: (Int) -> Unit,
-    viewModel: MovieListViewModel = viewModel()
+    onSearch: (String) -> Unit,
+    onClearSearch: () -> Unit
 ){
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -56,21 +61,14 @@ fun MovieListScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = {viewModel.refresh()}) {
-                        Icon(
-                            imageVector = Icons.Default.Menu,
-                            contentDescription = "Giả lập loading"
-                        )
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { viewModel.simulateError() }) {
+                    IconButton(onClick = onRefresh) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
-                            contentDescription = "Giả lập lỗi làm mới danh sách"
+                            contentDescription = "Làm mới danh sách"
                         )
                     }
                 },
+
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
                     titleContentColor = MaterialTheme.colorScheme.onSurface,
@@ -87,9 +85,7 @@ fun MovieListScreen(
         ) {
             OutlinedTextField(
                 value = searchQuery,
-                onValueChange = {query ->
-                    viewModel.searchMovies(query)
-                },
+                onValueChange = { onSearch(it) },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
@@ -99,7 +95,7 @@ fun MovieListScreen(
                 },
                 trailingIcon = {
                     if (searchQuery.isNotEmpty()) {
-                        IconButton(onClick = { viewModel.searchMovies("") }) {
+                        IconButton(onClick = onClearSearch) {
                             Icon(imageVector = Icons.Default.Clear, contentDescription = "Xóa từ khóa")
                         }
                     }
@@ -142,7 +138,7 @@ fun MovieListScreen(
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
                             Text(text = state.message, color = MaterialTheme.colorScheme.error)
-                            Button(onClick = { viewModel.loadMovies() }) {
+                            Button(onClick = onRetry) {
                                 Text("Thử lại")
                             }
                         }
@@ -153,4 +149,22 @@ fun MovieListScreen(
 
     }
 
+}
+
+@Composable
+fun MovieListRoute(
+    onMovieClick: (Int) -> Unit,
+    viewModel: MovieListViewModel = hiltViewModel()
+){
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
+    MovieListScreen(
+        uiState = uiState,
+        searchQuery = searchQuery,
+        onRefresh = { viewModel.refresh() },
+        onRetry = { viewModel.refresh() },
+        onMovieClick = onMovieClick,
+        onSearch = {query: String -> viewModel.searchMovies(query)},
+        onClearSearch = { viewModel.searchMovies("") }
+    )
 }

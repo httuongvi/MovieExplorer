@@ -4,13 +4,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tuongvi.movieexplorer.data.api.RetrofitClient
 import com.tuongvi.movieexplorer.data.dto.toMovie
+import com.tuongvi.movieexplorer.data.repository.MovieRepository
 import com.tuongvi.movieexplorer.model.Movie
 import com.tuongvi.movieexplorer.model.MovieListUiState
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 
 //val sampleMovies = listOf(
@@ -95,12 +98,17 @@ import kotlinx.coroutines.launch
 //        releaseDate = "2001-07-20"
 //    )
 //)
-class MovieListViewModel: ViewModel() {
+
+@HiltViewModel
+class MovieListViewModel @Inject constructor(
+    private val movieRepository: MovieRepository
+): ViewModel() {
     private val _uiState = MutableStateFlow<MovieListUiState>(MovieListUiState.Loading)
     val uiState: StateFlow<MovieListUiState> = _uiState.asStateFlow()
 
     private val _searchQuery = MutableStateFlow("")
     val searchQuery = _searchQuery.asStateFlow()
+
 
     init {
         loadMovies()
@@ -108,21 +116,17 @@ class MovieListViewModel: ViewModel() {
     fun loadMovies(){
         viewModelScope.launch {
             _uiState.value = MovieListUiState.Loading
-            try {
-                val responseDto = RetrofitClient.movieApi.getPopularMovies(
-                    apiKey = RetrofitClient.API_KEY
-                )
 
-                val movies = responseDto.results.map { dto -> dto.toMovie() }
+            val result = movieRepository.getPopularMovies()
 
-                _uiState.value = MovieListUiState.Success(movies)
-
-            } catch (
-                e: Exception
-            ){
-                android.util.Log.e("API_ERROR", "Lỗi gọi API hoặc Parse JSON: ${e.message}", e)
-                _uiState.value = MovieListUiState.Error(e.localizedMessage ?: "Lỗi tải phim")
+            result.onSuccess {
+                _uiState.value = MovieListUiState.Success(it)
             }
+                .onFailure {
+                    _uiState.value = MovieListUiState.Error(
+                        message = it?.localizedMessage ?: "Lỗi khi tải danh sách phim phổ biến"
+                    )
+                }
         }
     }
 
@@ -135,19 +139,17 @@ class MovieListViewModel: ViewModel() {
 
         viewModelScope.launch {
             _uiState.value = MovieListUiState.Loading
-            try {
-                val responseDto = RetrofitClient.movieApi.getSearchMovies(
-                    apiKey = RetrofitClient.API_KEY,
-                    query = _searchQuery.value
-                )
-                val movies = responseDto.results.map { dto -> dto.toMovie() }
 
-                _uiState.value = MovieListUiState.Success(movies)
-            }catch (
-                e: Exception
-            ){
-                _uiState.value = MovieListUiState.Error(e.localizedMessage ?: "Lỗi tìm kiếm phim")
+            val result = movieRepository.getSearchMovies(query = query)
+
+            result.onSuccess {
+                _uiState.value = MovieListUiState.Success(it)
             }
+                .onFailure {
+                    _uiState.value = MovieListUiState.Error(
+                        message = it.localizedMessage ?: "Lỗi khi tìm kiếm"
+                    )
+                }
         }
     }
 
