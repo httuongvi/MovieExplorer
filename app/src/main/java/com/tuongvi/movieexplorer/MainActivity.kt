@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,18 +57,23 @@ import com.tuongvi.movieexplorer.ui.screens.Day06DrillScreen
 import com.tuongvi.movieexplorer.ui.screens.Day08DrillScreen
 import com.tuongvi.movieexplorer.ui.theme.MovieExplorerTheme
 import com.tuongvi.movieexplorer.viewmodel.MovieListViewModel
+import com.tuongvi.movieexplorer.viewmodel.ThemeViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    private val themeViewModel: ThemeViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            MovieExplorerTheme {
-                AppNavigation()
-
+            val isDarkMode by themeViewModel.isDarkMode.collectAsStateWithLifecycle()
+            MovieExplorerTheme(darkTheme = isDarkMode) {
+                AppNavigation(
+                    isDarkMode = isDarkMode,
+                    onToggleDarkMode = { isDark -> themeViewModel.toggleDarkMode(isDark) }
+                )
             }
         }
 

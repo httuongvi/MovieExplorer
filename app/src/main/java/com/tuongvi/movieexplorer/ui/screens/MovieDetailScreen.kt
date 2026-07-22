@@ -14,6 +14,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,21 +26,28 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.tuongvi.movieexplorer.R
 import com.tuongvi.movieexplorer.model.Movie
+import com.tuongvi.movieexplorer.viewmodel.MovieDetailViewModel
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun MovieDetailScreen(
     movie: Movie?,
     onBackClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: MovieDetailViewModel = hiltViewModel()
 ){
     if (movie == null) {
         Box(
@@ -48,6 +57,10 @@ fun MovieDetailScreen(
             Text("Không tìm thấy phim")
         }
     } else{
+        LaunchedEffect(movie) {
+            viewModel.setMovie(movie)
+        }
+        val isFavorite by viewModel.isFavorite.collectAsStateWithLifecycle()
         Scaffold(
             topBar = {
                 CenterAlignedTopAppBar(
@@ -64,6 +77,17 @@ fun MovieDetailScreen(
                             Icon(
                                 imageVector = Icons.Default.ArrowBackIosNew,
                                 contentDescription = "Quay về trang trước"
+                            )
+                        }
+                    },
+                    actions = {
+                        IconButton(
+                            onClick = {viewModel.toggleFavorite()}
+                        ) {
+                            Icon(
+                                imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                contentDescription = "Thả tim",
+                                tint = if (isFavorite) Color.Red else MaterialTheme.colorScheme.onSurface
                             )
                         }
                     },
@@ -84,6 +108,7 @@ fun MovieDetailScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
+
                 Text(
                     text = movie.title,
                     style = MaterialTheme.typography.headlineMedium,

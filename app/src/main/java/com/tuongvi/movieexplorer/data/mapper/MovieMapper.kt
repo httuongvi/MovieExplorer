@@ -1,5 +1,6 @@
-package com.tuongvi.movieexplorer.data.dto
+package com.tuongvi.movieexplorer.data.mapper
 
+import com.tuongvi.movieexplorer.data.dto.MovieDto
 import com.tuongvi.movieexplorer.model.Movie
 
 fun MovieDto.toMovie(): Movie{

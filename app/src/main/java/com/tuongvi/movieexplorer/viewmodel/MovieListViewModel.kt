@@ -2,13 +2,10 @@ package com.tuongvi.movieexplorer.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.tuongvi.movieexplorer.data.api.RetrofitClient
-import com.tuongvi.movieexplorer.data.dto.toMovie
 import com.tuongvi.movieexplorer.data.repository.MovieRepository
 import com.tuongvi.movieexplorer.model.Movie
 import com.tuongvi.movieexplorer.model.MovieListUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -109,9 +106,20 @@ class MovieListViewModel @Inject constructor(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery = _searchQuery.asStateFlow()
 
+    private val _favoriteCount = MutableStateFlow(0)
+    val favoriteCount: StateFlow<Int> = _favoriteCount.asStateFlow()
 
     init {
         loadMovies()
+        countFavorite()
+    }
+
+    fun countFavorite(){
+        viewModelScope.launch {
+            movieRepository.getAllFavoriteMovies().collect { list ->
+                _favoriteCount.value = list.size
+            }
+        }
     }
     fun loadMovies(){
         viewModelScope.launch {

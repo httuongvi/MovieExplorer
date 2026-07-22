@@ -1,5 +1,6 @@
 package com.tuongvi.movieexplorer.ui.screens
 
+
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,22 +44,18 @@ import androidx.compose.material3.Switch
 import androidx.compose.runtime.State
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.tuongvi.movieexplorer.model.Movie
+import com.tuongvi.movieexplorer.viewmodel.MovieFavoriteListViewModel
 
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun MovieListScreen(
-    uiState: MovieListUiState,
-    searchQuery: String,
+fun MovieFavoriteListScreen(
+    favoriteMovies: List<Movie>,
     favoriteCount: Int,
     isDarkMode: Boolean,
     onToggleDarkMode: (Boolean) -> Unit,
-    onRefresh: () -> Unit,
-    onRetry : () -> Unit,
-    onMovieClick: (Int) -> Unit,
-    onSearch: (String) -> Unit,
-    onClearSearch: () -> Unit,
-    onHeartClick: () -> Unit
+    onMovieClick: (Int) -> Unit
 ){
     Scaffold(
         topBar = {
@@ -68,14 +65,6 @@ fun MovieListScreen(
                         text = "Movie Explorer",
                         style = MaterialTheme.typography.titleMedium
                     )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onRefresh) {
-                        Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = "Làm mới danh sách"
-                        )
-                    }
                 },
                 actions = {
                     Switch(
@@ -91,15 +80,11 @@ fun MovieListScreen(
                         },
                         modifier = Modifier.padding(end = 8.dp)
                     ) {
-                        IconButton(
-                            onClick = onHeartClick
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Favorite,
-                                contentDescription = "Danh sách yêu thích",
-                                tint = Color.Red
-                            )
-                        }
+                        Icon(
+                            imageVector = Icons.Default.Favorite,
+                            contentDescription = "Danh sách yêu thích",
+                            tint = Color.Red
+                        )
                     }
                 },
 
@@ -117,65 +102,34 @@ fun MovieListScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { onSearch(it) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                placeholder = { Text("Tìm kiếm phim...") },
-                leadingIcon = {
-                    Icon(imageVector = Icons.Default.Search, contentDescription = "Search Icon")
-                },
-                trailingIcon = {
-                    if (searchQuery.isNotEmpty()) {
-                        IconButton(onClick = onClearSearch) {
-                            Icon(imageVector = Icons.Default.Clear, contentDescription = "Xóa từ khóa")
-                        }
-                    }
-                },
-                singleLine = true
-            )
             Box(
                 modifier = Modifier
                     .fillMaxSize()
 
             ){
-                when (val state = uiState){
-                    is MovieListUiState.Loading -> {
-                        CircularProgressIndicator(
-                            modifier = Modifier.align(Alignment.Center),
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    is MovieListUiState.Success -> {
-                        LazyColumn(
-                            contentPadding = PaddingValues(
-                                top = 0.dp,
-                                bottom = 16.dp,
-                                start = 16.dp,
-                                end = 16.dp
-                            ),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            items(
-                                items = state.movies,
-                                key = { movie -> movie.id }
-                            ) { movie ->
-                                MovieCard(movie, onClick = {onMovieClick(movie.id)})
-                            }
+                if (favoriteCount > 0) {
+                    LazyColumn(
+                        contentPadding = PaddingValues(
+                            top = 0.dp,
+                            bottom = 16.dp,
+                            start = 16.dp,
+                            end = 16.dp
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        items(
+                            items = favoriteMovies,
+                            key = { movie -> movie.id }
+                        ) { movie ->
+                            MovieCard(movie, onClick = {onMovieClick(movie.id)})
                         }
                     }
-                    is MovieListUiState.Error ->{
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Text(text = state.message, color = MaterialTheme.colorScheme.error)
-                            Button(onClick = onRetry) {
-                                Text("Thử lại")
-                            }
-                        }
+                } else{
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(text = "Chưa có phim yêu thích", color = MaterialTheme.colorScheme.error)
                     }
                 }
             }
@@ -186,27 +140,19 @@ fun MovieListScreen(
 }
 
 @Composable
-fun MovieListRoute(
+fun MovieFavoriteListRoute(
     onMovieClick: (Int) -> Unit,
-    viewModel: MovieListViewModel = hiltViewModel(),
+    viewModel: MovieFavoriteListViewModel = hiltViewModel(),
     isDarkMode: Boolean,
-    onToggleDarkMode: (Boolean) -> Unit,
-    onHeartClick: () -> Unit
+    onToggleDarkMode: (Boolean) -> Unit
 ){
-    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
-    val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
+    val favoriteMovies by viewModel.favoriteMovies.collectAsStateWithLifecycle()
     val favoriteCount by viewModel.favoriteCount.collectAsStateWithLifecycle()
-    MovieListScreen(
-        uiState = uiState,
-        searchQuery = searchQuery,
+    MovieFavoriteListScreen(
+        favoriteMovies = favoriteMovies,
         favoriteCount = favoriteCount,
         isDarkMode = isDarkMode,
         onToggleDarkMode = onToggleDarkMode,
-        onRefresh = { viewModel.refresh() },
-        onRetry = { viewModel.refresh() },
-        onMovieClick = onMovieClick,
-        onSearch = {query: String -> viewModel.searchMovies(query)},
-        onClearSearch = { viewModel.searchMovies("") },
-        onHeartClick = onHeartClick
+        onMovieClick = onMovieClick
     )
 }
