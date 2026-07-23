@@ -56,8 +56,10 @@ import com.tuongvi.movieexplorer.ui.screens.Day06DrillScreen
 import com.tuongvi.movieexplorer.ui.screens.Day08DrillScreen
 import com.tuongvi.movieexplorer.ui.theme.MovieExplorerTheme
 import com.tuongvi.movieexplorer.viewmodel.MovieListViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
