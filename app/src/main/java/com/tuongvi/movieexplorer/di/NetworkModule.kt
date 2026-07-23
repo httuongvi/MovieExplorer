@@ -1,6 +1,7 @@
 package com.tuongvi.movieexplorer.di
 import com.tuongvi.movieexplorer.data.api.MovieApi
 import com.tuongvi.movieexplorer.data.api.RetrofitClient
+import com.tuongvi.movieexplorer.data.local.dao.FavoriteMovieDao
 import com.tuongvi.movieexplorer.data.repository.MovieRepository
 import com.tuongvi.movieexplorer.data.repository.MovieRepositoryImpl
 import dagger.Module
@@ -58,8 +59,8 @@ object NetworkModule{
 
     @Provides
     @Singleton
-    fun provideMovieRepository(movieApi: MovieApi): MovieRepository{
-        return MovieRepositoryImpl(movieApi)
+    fun provideMovieRepository(movieApi: MovieApi, favoriteMovieDao: FavoriteMovieDao): MovieRepository{
+        return MovieRepositoryImpl(movieApi, favoriteMovieDao)
     }
 
 }
