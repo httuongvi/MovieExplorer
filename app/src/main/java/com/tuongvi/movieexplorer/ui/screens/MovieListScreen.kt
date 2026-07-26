@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Brightness5
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Menu
@@ -42,7 +43,9 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.State
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.tuongvi.movieexplorer.R
 
 
 @Composable
@@ -58,14 +61,17 @@ fun MovieListScreen(
     onMovieClick: (Int) -> Unit,
     onSearch: (String) -> Unit,
     onClearSearch: () -> Unit,
-    onHeartClick: () -> Unit
+    onHeartClick: () -> Unit,
+    onSettingClick: () -> Unit
 ){
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Movie Explorer",
+                        text = stringResource(
+                            id = R.string.app_name
+                        ),
                         style = MaterialTheme.typography.titleMedium
                     )
                 },
@@ -78,11 +84,14 @@ fun MovieListScreen(
                     }
                 },
                 actions = {
-                    Switch(
-                        checked = isDarkMode,
-                        onCheckedChange = onToggleDarkMode,
-                        modifier = Modifier.padding(8.dp)
-                    )
+                    IconButton(
+                        onClick = onSettingClick
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Brightness5,
+                            contentDescription = "Setting"
+                        )
+                    }
                     BadgedBox(
                         badge = {
                             if (favoriteCount > 0) {
@@ -123,7 +132,9 @@ fun MovieListScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
-                placeholder = { Text("Tìm kiếm phim...") },
+                placeholder = { Text(text = stringResource(
+                    id = R.string.search_hint
+                )) },
                 leadingIcon = {
                     Icon(imageVector = Icons.Default.Search, contentDescription = "Search Icon")
                 },
@@ -173,7 +184,9 @@ fun MovieListScreen(
                         ) {
                             Text(text = state.message, color = MaterialTheme.colorScheme.error)
                             Button(onClick = onRetry) {
-                                Text("Thử lại")
+                                Text(text = stringResource(
+                                    id = R.string.retry
+                                ))
                             }
                         }
                     }
@@ -191,7 +204,8 @@ fun MovieListRoute(
     viewModel: MovieListViewModel = hiltViewModel(),
     isDarkMode: Boolean,
     onToggleDarkMode: (Boolean) -> Unit,
-    onHeartClick: () -> Unit
+    onHeartClick: () -> Unit,
+    onSettingClick: () -> Unit
 ){
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
@@ -207,6 +221,7 @@ fun MovieListRoute(
         onMovieClick = onMovieClick,
         onSearch = {query: String -> viewModel.searchMovies(query)},
         onClearSearch = { viewModel.searchMovies("") },
-        onHeartClick = onHeartClick
+        onHeartClick = onHeartClick,
+        onSettingClick = onSettingClick
     )
 }

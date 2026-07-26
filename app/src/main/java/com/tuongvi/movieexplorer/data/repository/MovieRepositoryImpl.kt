@@ -8,6 +8,7 @@ import com.tuongvi.movieexplorer.data.mapper.toMovie
 import com.tuongvi.movieexplorer.model.Movie
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import retrofit2.Retrofit
 
 class MovieRepositoryImpl(
     private val movieApi: MovieApi,
@@ -50,5 +51,20 @@ class MovieRepositoryImpl(
 
     override suspend fun removeFavorite(movieId: Int) {
         favoriteMovieDao.deleteFavoriteMovieById(movieId)
+    }
+
+    override suspend fun getMovieDetail(movieId: Int): Result<Movie> {
+        return try {
+            val localMovie = favoriteMovieDao.getFavoriteMovieDetail(movieId)
+            if(localMovie != null){
+                Result.success(localMovie.toMovie())
+            } else {
+                val networkMovie = movieApi.getMovieDetail(movieId, RetrofitClient.API_KEY)
+                Result.success(networkMovie
+                    .toMovie())
+            }
+        } catch (e: Exception){
+            Result.failure(e)
+        }
     }
 }

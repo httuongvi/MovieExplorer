@@ -33,34 +33,43 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import com.tuongvi.movieexplorer.R
 import com.tuongvi.movieexplorer.model.Movie
+import com.tuongvi.movieexplorer.utlis.FormatUtlis
 import com.tuongvi.movieexplorer.viewmodel.MovieDetailViewModel
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun MovieDetailScreen(
-    movie: Movie?,
+    movieId: Int,
     onBackClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: MovieDetailViewModel = hiltViewModel()
 ){
+    LaunchedEffect(movieId) {
+        viewModel.getMovieById(movieId)
+    }
+
+    val currentMovie by viewModel.curentMovie.collectAsStateWithLifecycle()
+    val isFavorite by viewModel.isFavorite.collectAsStateWithLifecycle()
+    val error by viewModel.error.collectAsStateWithLifecycle()
+    val movie = currentMovie
+
     if (movie == null) {
         Box(
             modifier = modifier.fillMaxSize().padding(24.dp),
             contentAlignment = Alignment.Center
         ) {
-            Text("Không tìm thấy phim")
+            Text(text = stringResource(id = R.string.not_found))
         }
     } else{
-        LaunchedEffect(movie) {
-            viewModel.setMovie(movie)
-        }
-        val isFavorite by viewModel.isFavorite.collectAsStateWithLifecycle()
+        val formattedRating = FormatUtlis.formatRating(movie.voteAverage)
+        val formattedDate = FormatUtlis.formatReleaseDate(movie.releaseDate)
         Scaffold(
             topBar = {
                 CenterAlignedTopAppBar(
@@ -76,7 +85,7 @@ fun MovieDetailScreen(
                         ) {
                             Icon(
                                 imageVector = Icons.Default.ArrowBackIosNew,
-                                contentDescription = "Quay về trang trước"
+                                contentDescription = stringResource(id = R.string.back)
                             )
                         }
                     },
@@ -130,7 +139,7 @@ fun MovieDetailScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = movie.voteAverage.toString(),
+                        text = stringResource(id = R.string.rating_format, formattedRating),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -144,10 +153,19 @@ fun MovieDetailScreen(
                 }
 
                 Text(
+                    text = stringResource(
+                        id = R.string.release_date_prefix, formattedDate
+                    ),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Text(
                     text = movie.overview,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
+
             }
 
         }

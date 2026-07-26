@@ -43,9 +43,13 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.State
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.tuongvi.movieexplorer.model.Movie
 import com.tuongvi.movieexplorer.viewmodel.MovieFavoriteListViewModel
+import com.tuongvi.movieexplorer.R
 
 
 @Composable
@@ -62,7 +66,7 @@ fun MovieFavoriteListScreen(
             CenterAlignedTopAppBar(
                 title = {
                     Text(
-                        text = "Movie Explorer",
+                        text = stringResource(id = R.string.app_name),
                         style = MaterialTheme.typography.titleMedium
                     )
                 },
@@ -102,10 +106,21 @@ fun MovieFavoriteListScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
+            Text(
+                text = pluralStringResource(
+                    id = R.plurals.favorite_count,
+                    count = favoriteCount,
+                    favoriteCount
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.titleLarge
+            )
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-
             ){
                 if (favoriteCount > 0) {
                     LazyColumn(
@@ -129,7 +144,7 @@ fun MovieFavoriteListScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text(text = "Chưa có phim yêu thích", color = MaterialTheme.colorScheme.error)
+                        Text(text = stringResource(id = R.string.no_favorites), color = MaterialTheme.colorScheme.error)
                     }
                 }
             }
