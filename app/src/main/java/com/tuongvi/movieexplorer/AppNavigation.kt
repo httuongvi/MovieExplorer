@@ -13,6 +13,7 @@ import com.tuongvi.movieexplorer.ui.screens.MovieDetailScreen
 import com.tuongvi.movieexplorer.ui.screens.MovieFavoriteListRoute
 import com.tuongvi.movieexplorer.ui.screens.MovieListRoute
 import com.tuongvi.movieexplorer.ui.screens.MovieListScreen
+import com.tuongvi.movieexplorer.ui.screens.SettingsScreen
 import com.tuongvi.movieexplorer.viewmodel.MovieFavoriteListViewModel
 import com.tuongvi.movieexplorer.viewmodel.MovieListViewModel
 
@@ -40,6 +41,9 @@ fun AppNavigation(
                 onToggleDarkMode = onToggleDarkMode,
                 onHeartClick = {
                     navController.navigate("listfavorite")
+                },
+                onSettingClick = {
+                    navController.navigate("setting")
                 }
             )
         }
@@ -51,9 +55,8 @@ fun AppNavigation(
                 )
             ){ backStackEntry ->
             val movieId = backStackEntry.arguments?.getInt("movieId") ?: 0
-            val selectedMovie = movieViewModel.getMovieById(movieId)
             MovieDetailScreen(
-                movie = selectedMovie,
+                movieId = movieId,
                 onBackClick = {
                     navController.popBackStack()
                 }
@@ -72,6 +75,10 @@ fun AppNavigation(
                 isDarkMode = isDarkMode,
                 onToggleDarkMode = onToggleDarkMode
             )
+        }
+
+        composable(route = "setting") {
+            SettingsScreen()
         }
     }
 }

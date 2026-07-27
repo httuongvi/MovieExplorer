@@ -21,12 +21,26 @@ class MovieDetailViewModel @Inject constructor(
     private val _isFavorite = MutableStateFlow(false)
     val isFavorite: StateFlow<Boolean> = _isFavorite.asStateFlow()
 
-    fun setMovie(movie: Movie){
-        _currentmovie.value = movie
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error.asStateFlow()
+
+    fun checkIsFavorite(movieId: Int){
         viewModelScope.launch {
-            repository.isFavorite(movie.id).collect { favorite ->
-                _isFavorite.value = favorite
-            }
+            repository.isFavorite(movieId).collect { _isFavorite.value = it }
+        }
+    }
+
+    fun getMovieById (movieId: Int){
+        checkIsFavorite(movieId)
+
+        viewModelScope.launch {
+            repository.getMovieDetail(movieId)
+                .onSuccess {
+                    _currentmovie.value = it
+                }
+                .onFailure {
+                    _error.value = it.localizedMessage ?: "Không tìm thấy phim"
+                }
         }
     }
 

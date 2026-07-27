@@ -113,9 +113,9 @@ fun ProfileScreen(userName: String, onNavigateToSettings: () -> Unit) {
     }
 }
 
-@Composable
-fun SettingsScreen() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Đây là màn hình SETTINGS", style = MaterialTheme.typography.headlineMedium)
-    }
-}
+//@Composable
+//fun SettingsScreen() {
+//    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+//        Text("Đây là màn hình SETTINGS", style = MaterialTheme.typography.headlineMedium)
+//    }
+//}
